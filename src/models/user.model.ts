@@ -12,6 +12,7 @@ interface IUser extends Document {
   _password?: string;
   makeSalt: () => string;
   encryptPassword: (password: string) => string;
+  authenticate: (plainText: string) => boolean;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -55,21 +56,21 @@ UserSchema.virtual("password")
     return this._password;
   });
 
-UserSchema.methods = {
-  authenticate: function (plainText: string) {
-    return this.encryptPassword(plainText) === this.hashedPassword;
-  },
-  encryptPassword: function (password: string) {
-    if (!password) return "";
-    try {
-      return createHmac("sha1", this.salt).update(password).digest("hex");
-    } catch (err) {
-      return "";
-    }
-  },
-  makeSalt: function () {
-    return Math.round(new Date().valueOf() * Math.random()) + "";
-  },
+UserSchema.methods.authenticate = function (plainText: string) {
+  return this.encryptPassword(plainText) === this.hashedPassword;
+};
+
+UserSchema.methods.encryptPassword = function (password: string) {
+  if (!password) return "";
+  try {
+    return createHmac("sha1", this.salt).update(password).digest("hex");
+  } catch (err) {
+    return "";
+  }
+};
+
+UserSchema.methods.makeSalt = function () {
+  return Math.round(new Date().valueOf() * Math.random()) + "";
 };
 
 UserSchema.path("hashedPassword").validate(function (v: string) {

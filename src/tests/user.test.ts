@@ -45,24 +45,34 @@ describe("users tests suite", () => {
         );
       });
   });
-  it("GET ONE USER with ID -> should return one users", () => {
-    return actualRequest
-      .get(`/api/users/${user1._id}`)
+  it("GET ONE USER with ID -> should return one user when auth", async () => {
+    const authResponse = await actualRequest
+      .post("/api/auth/signin")
+      .set("Content-Type", "application/json")
+      .send({ email: user1.email, password: user1.password })
       .expect(200)
-      .expect("Content-Type", /json/)
-      .then((response) => {
-        expect(response.body).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              _id: expect.any(String),
-              name: "Julien POIRIER",
-              email: "test@email.com",
-              createdAt: expect.any(String),
-              updatedAt: expect.any(String),
-            }),
-          ])
-        );
-      });
+      .expect("Content-Type", /json/);
+
+    const id = authResponse.body.user._id;
+
+    const token = authResponse.body.token;
+    const response = await actualRequest
+      .get(`/api/users/${id}`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    expect(response.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          _id: expect.any(String),
+          name: "Julien POIRIER",
+          email: "test@email.com",
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      ])
+    );
   });
   it("CREATE USER WITH BODY -> should return created user", () => {
     const newUser = {
@@ -88,12 +98,25 @@ describe("users tests suite", () => {
         );
       });
   });
-  it("MODIFY USER WITH BODY -> should return modified user", () => {
+  it("MODIFY USER WITH BODY -> should return modified user when auth", async () => {
+    const authResponse = await actualRequest
+      .post("/api/auth/signin")
+      .set("Content-Type", "application/json")
+      .send({ email: user1.email, password: user1.password })
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    const token = authResponse.body.token;
+
+    const id = authResponse.body.user._id;
+
     const newUser = {
       name: "Autre exemple",
     };
-    return actualRequest
-      .put(`/api/users/${user1._id}`)
+
+    actualRequest
+      .put(`/api/users/${id}`)
+      .set("Authorization", `Bearer ${token}`)
       .send(newUser)
       .expect(200)
       .expect("Content-Type", /json/)
@@ -107,9 +130,20 @@ describe("users tests suite", () => {
         });
       });
   });
-  it("DELETE USER WITH ID -> should return deleted user", () => {
-    return actualRequest
-      .delete(`/api/users/${user1._id}`)
+  it("DELETE USER WITH ID -> should return deleted user when auth", async () => {
+    const authResponse = await actualRequest
+      .post("/api/auth/signin")
+      .set("Content-Type", "application/json")
+      .send({ email: user1.email, password: user1.password })
+      .expect(200)
+      .expect("Content-Type", /json/);
+
+    const token = authResponse.body.token;
+    const id = authResponse.body.user._id;
+
+    actualRequest
+      .delete(`/api/users/${id}`)
+      .set("Authorization", `Bearer ${token}`)
       .expect(200)
       .expect("Content-Type", /json/)
       .then((response) => {

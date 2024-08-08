@@ -1,4 +1,4 @@
-import e, { Router } from "express";
+import { Router } from "express";
 import BattleController from "../controllers/battleController";
 
 const router = Router();

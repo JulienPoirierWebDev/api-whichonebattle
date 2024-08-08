@@ -87,7 +87,12 @@ beforeAll(async () => {
   battle2._id = newBattle2._id as string;
 });
 
-afterAll(async () => {});
+afterAll(async () => {
+  await User.deleteMany();
+  await Battle.deleteMany();
+  await connection.db.dropDatabase();
+  await connection.close();
+});
 
 const actualRequest = request(app);
 

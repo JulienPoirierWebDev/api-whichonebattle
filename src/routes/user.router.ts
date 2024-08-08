@@ -1,14 +1,24 @@
 import { Router } from "express";
 import UserController from "../controllers/usersController";
+import AuthController from "../controllers/authController";
 
 const router = Router();
 const userController = new UserController();
+const authController = new AuthController();
+
+router.get("/", userController.getAll).post("/", userController.create);
 
 router
-  .get("/", userController.getAll)
-  .get("/:id", userController.getOne)
-  .post("/", userController.create)
-  .put("/:id", userController.update)
-  .delete("/:id", userController.delete);
-
+  .route("/:id")
+  .get(authController.requireSignin, userController.getOne)
+  .put(
+    authController.requireSignin,
+    authController.hasAuthorization,
+    userController.update
+  )
+  .delete(
+    authController.requireSignin,
+    authController.hasAuthorization,
+    userController.delete
+  );
 export default router;
