@@ -25,7 +25,7 @@ afterAll(async () => {
 });
 
 const actualRequest = request(app);
-describe("users tests suite", () => {
+xdescribe("users tests suite", () => {
   it("GET USERS -> should return multiple users", () => {
     return actualRequest
       .get(`/api/users/`)

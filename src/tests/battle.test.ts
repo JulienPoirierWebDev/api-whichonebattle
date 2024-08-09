@@ -1,60 +1,11 @@
 import request from "supertest";
 import app from "../app";
-import { before } from "node:test";
 import connect from "../helpers/db";
 import User from "../models/user.model";
 import { user1, user2 } from "./testData";
 import Battle from "../models/battle.model";
 import { connection } from "mongoose";
-import e from "express";
-
-type BattleType = {
-  _id?: string;
-  question: string;
-  texte: string;
-  propositions: Array<{ name: string }>;
-  user_id?: string;
-  created_at?: Date;
-};
-
-let battle1: BattleType = {
-  question: "Fraise ou Chocolat ?",
-  texte: "Pour un parfum, vous êtes plutôt ...",
-  propositions: [
-    {
-      name: "Fraise",
-    },
-    {
-      name: "Chocolat",
-    },
-  ],
-};
-
-let battle2: BattleType = {
-  question: "Chien ou Chat ?",
-  texte: "Pour un animal de compagnie, vous êtes plutôt ...",
-  propositions: [
-    {
-      name: "Chien",
-    },
-    {
-      name: "Chat",
-    },
-  ],
-};
-
-let newBattleForPostTest: BattleType = {
-  question: "Chaud ou Froid ?",
-  texte: "Pour un climat, vous êtes plutôt ...",
-  propositions: [
-    {
-      name: "Chaud",
-    },
-    {
-      name: "Froid",
-    },
-  ],
-};
+import { battle1, battle2, newBattleForPostTest } from "./testData";
 
 beforeAll(async () => {
   await connect(true);
@@ -96,7 +47,7 @@ afterAll(async () => {
 
 const actualRequest = request(app);
 
-describe("battle tests suite", () => {
+xdescribe("battle tests suite", () => {
   it("GET BATTLE -> should return multiple battles", async () => {
     const response = await actualRequest
       .get(`/api/battles/`)

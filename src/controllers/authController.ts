@@ -3,7 +3,7 @@ import { expressjwt } from "express-jwt";
 import User from "../models/user.model";
 import jwt from "jsonwebtoken";
 
-interface IRequest extends Request {
+export interface IRequest extends Request {
   profile?: any;
   auth?: any;
 }

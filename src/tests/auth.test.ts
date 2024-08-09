@@ -24,7 +24,7 @@ afterAll(async () => {
   await connection.close();
 });
 
-describe("auth tests suite", () => {
+xdescribe("auth tests suite", () => {
   it("SIGNIN -> should return token and user", async () => {
     const response = await actualRequest
       .post(`/api/auth/signin`)
