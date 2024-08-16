@@ -60,7 +60,6 @@ class VoteController {
 
     const name1 = battle?.propositions[0].name;
     const name2 = battle?.propositions[1].name;
-    console.log(name1, name2);
 
     const votesForFirstProposition = await Vote.countDocuments({
       battle_id: battleIdObj,

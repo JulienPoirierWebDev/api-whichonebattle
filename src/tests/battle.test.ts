@@ -5,7 +5,29 @@ import User from "../models/user.model";
 import { user1, user2 } from "./testData";
 import Battle from "../models/battle.model";
 import { connection } from "mongoose";
-import { battle1, battle2, newBattleForPostTest } from "./testData";
+import {
+  battle1,
+  battle2,
+  newBattleForPostTest,
+  battle3,
+  battle4,
+  battle5,
+  battle6,
+  battle7,
+  battle8,
+  battle9,
+  battle10,
+  battle11,
+  battle12,
+  battle13,
+  battle14,
+  battle15,
+  battle16,
+  battle17,
+  battle18,
+  battle19,
+  battle20,
+} from "./testData";
 
 beforeAll(async () => {
   await connect(true);
@@ -47,7 +69,7 @@ afterAll(async () => {
 
 const actualRequest = request(app);
 
-xdescribe("battle tests suite", () => {
+describe("battle tests suite", () => {
   it("GET BATTLE -> should return multiple battles", async () => {
     const response = await actualRequest
       .get(`/api/battles/`)

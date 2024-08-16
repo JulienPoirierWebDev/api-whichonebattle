@@ -1,13 +1,93 @@
 import Battle from "../models/battle.model";
 import { Request, Response } from "express";
+import { IRequest } from "./authController";
+import Vote from "../models/vote.model";
+import { log } from "node:console";
 
 interface IBattleController {
   getAll(req: Request, res: Response): void;
 }
 
 class BattleController implements IBattleController {
-  async getAll(req: Request, res: Response) {
+  async getAll(req: IRequest, res: Response) {
     try {
+      // get query parameters
+      const { limit, page, order, unvoted } = req.query;
+
+      const skip = Number(limit) * Number(page) || 0;
+
+      type DateType = 1 | -1;
+      let date: DateType = -1;
+
+      if (order === "asc") {
+        date = 1;
+      }
+      if (limit) {
+        if (order) {
+          if (unvoted) {
+            if (!req.auth._id) {
+              return res.status(401).json({
+                message: "You should login before asking not votend question",
+              });
+            }
+
+            const votedBattles = await Vote.find({
+              user_id: req.auth._id,
+            }).select("battle_id");
+
+            const votedBattlesIds = votedBattles.map((vote) => vote.battle_id);
+
+            const battles = await Battle.find({
+              _id: { $nin: votedBattlesIds },
+            })
+              .limit(Number(limit))
+              .skip(skip)
+              .sort({ created_at: date })
+              .select("question texte propositions user_id created_at");
+
+            return res.status(200).json(battles);
+          }
+
+          let battles = await Battle.find()
+            .limit(Number(limit))
+            .skip(skip)
+            .sort({ created_at: date })
+            .select("question texte propositions user_id created_at");
+
+          return res.status(200).json(battles);
+        }
+
+        if (unvoted) {
+          if (!req.auth) {
+            return res.status(401).json({
+              message: "You should login before asking not votend question",
+            });
+          }
+
+          const votedBattles = await Vote.find({
+            user_id: req.auth._id,
+          }).select("battle_id");
+
+          const votedBattlesIds = votedBattles.map((vote) => vote.battle_id);
+
+          const battles = await Battle.find({
+            _id: { $nin: votedBattlesIds },
+          })
+            .limit(Number(limit))
+            .skip(skip)
+            .select("question texte propositions user_id created_at");
+
+          return res.status(200).json(battles);
+        }
+
+        let battles = await Battle.find()
+          .limit(Number(limit))
+          .skip(skip)
+          .select("question texte propositions user_id created_at");
+
+        return res.status(200).json(battles);
+      }
+
       const battles = await Battle.find().select(
         "question texte propositions user_id"
       );

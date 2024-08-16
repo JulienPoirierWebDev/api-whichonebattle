@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Category from "../models/category.model";
 
 const connect = async (test: boolean) => {
   let MONGO_URI =
@@ -22,6 +23,25 @@ const connect = async (test: boolean) => {
     await mongoose.connection.on("connected", () => {
       console.info(`Connected to database`);
     });
+
+    //check if category is empty
+    const categories = await Category.find();
+
+    if (categories.length === 0) {
+      const defaultCategories = [
+        { name: "Histoire" },
+        { name: "Sport" },
+        { name: "Cinéma" },
+        { name: "Musique" },
+        { name: "Littérature" },
+        { name: "Art" },
+        { name: "Technologie" },
+        { name: "Jeux video" },
+        { name: "Insolite" },
+      ];
+
+      await Category.insertMany(defaultCategories as any);
+    }
   } catch (error) {
     console.log(error);
   }

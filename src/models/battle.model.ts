@@ -1,9 +1,3 @@
-/*
-  question: string;
-  texte: string;
-  propositions: propositionsType;
-*/
-
 import { model, Schema, Document } from "mongoose";
 
 interface IBattle extends Document {
@@ -13,6 +7,7 @@ interface IBattle extends Document {
   user_id?: string;
   created_at?: Date;
   responses?: string;
+  category?: string;
 }
 
 const battleSchema = new Schema<IBattle>({
@@ -43,7 +38,11 @@ const battleSchema = new Schema<IBattle>({
   },
   responses: {
     type: Schema.Types.ObjectId,
-    ref: "Response",
+    ref: "Vote",
+  },
+  category: {
+    type: Schema.Types.ObjectId,
+    ref: "Category",
   },
 });
 
