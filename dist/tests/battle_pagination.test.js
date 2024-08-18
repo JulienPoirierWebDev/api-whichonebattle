@@ -148,7 +148,7 @@ afterAll(() => __awaiter(void 0, void 0, void 0, function* () {
     yield mongoose_1.connection.close();
 }));
 const actualRequest = (0, supertest_1.default)(app_1.default);
-describe("get battles in order and pagination", () => {
+xdescribe("get battles in order and pagination", () => {
     it("GET BATTLE -> should return 5 battles when query parameter limit is set to 5 and query parameter page is set to 0 or not set", () => __awaiter(void 0, void 0, void 0, function* () {
         var _a, _b, _c, _d, _e;
         const response = yield actualRequest

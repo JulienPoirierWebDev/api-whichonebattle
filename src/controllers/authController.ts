@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import { expressjwt } from "express-jwt";
 import User from "../models/user.model";
 import jwt from "jsonwebtoken";
 
@@ -73,6 +72,11 @@ class AuthController {
       });
     }
     next();
+  };
+
+  logout = (req: IRequest, res: Response) => {
+    res.clearCookie("token");
+    return res.status(200).json({ message: "signed out" });
   };
 }
 

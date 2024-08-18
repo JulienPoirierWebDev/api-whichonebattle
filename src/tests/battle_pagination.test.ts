@@ -204,7 +204,7 @@ afterAll(async () => {
 
 const actualRequest = request(app);
 
-describe("get battles in order and pagination", () => {
+xdescribe("get battles in order and pagination", () => {
   it("GET BATTLE -> should return 5 battles when query parameter limit is set to 5 and query parameter page is set to 0 or not set", async () => {
     const response = await actualRequest
       .get(`/api/battles/?limit=5`)

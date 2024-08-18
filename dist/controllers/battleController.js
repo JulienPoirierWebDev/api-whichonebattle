@@ -14,6 +14,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const battle_model_1 = __importDefault(require("../models/battle.model"));
 const vote_model_1 = __importDefault(require("../models/vote.model"));
+const addValueToProposition = (battle) => __awaiter(void 0, void 0, void 0, function* () {
+    // Convertir l'objet Mongoose en objet JavaScript ordinaire
+    const battleObj = battle.toObject();
+    const votes = yield vote_model_1.default.find({
+        battle_id: battle._id,
+        name: { $in: battleObj.propositions.map((p) => p.name) },
+    });
+    const propositionValues = battleObj.propositions.map((proposition) => {
+        const value = votes.filter((vote) => vote.name === proposition.name).length;
+        return Object.assign(Object.assign({}, proposition), { value });
+    });
+    return Object.assign(Object.assign({}, battleObj), { propositions: propositionValues });
+});
 class BattleController {
     getAll(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -37,21 +50,28 @@ class BattleController {
                                 user_id: req.auth._id,
                             }).select("battle_id");
                             const votedBattlesIds = votedBattles.map((vote) => vote.battle_id);
-                            const battles = yield battle_model_1.default.find({
+                            let battles = yield battle_model_1.default.find({
                                 _id: { $nin: votedBattlesIds },
                             })
                                 .limit(Number(limit))
                                 .skip(skip)
                                 .sort({ created_at: date })
                                 .select("question texte propositions user_id created_at");
-                            return res.status(200).json(battles);
+                            // get value of proposition if any vote
+                            const battlesWithValues = yield Promise.all(battles.map((battle) => __awaiter(this, void 0, void 0, function* () {
+                                return addValueToProposition(battle);
+                            })));
+                            return res.status(200).json(battlesWithValues);
                         }
                         let battles = yield battle_model_1.default.find()
                             .limit(Number(limit))
                             .skip(skip)
                             .sort({ created_at: date })
                             .select("question texte propositions user_id created_at");
-                        return res.status(200).json(battles);
+                        const battlesWithValues = yield Promise.all(battles.map((battle) => __awaiter(this, void 0, void 0, function* () {
+                            return addValueToProposition(battle);
+                        })));
+                        return res.status(200).json(battlesWithValues);
                     }
                     if (unvoted) {
                         if (!req.auth) {
@@ -69,16 +89,25 @@ class BattleController {
                             .limit(Number(limit))
                             .skip(skip)
                             .select("question texte propositions user_id created_at");
-                        return res.status(200).json(battles);
+                        const battlesWithValues = yield Promise.all(battles.map((battle) => __awaiter(this, void 0, void 0, function* () {
+                            return addValueToProposition(battle);
+                        })));
+                        return res.status(200).json(battlesWithValues);
                     }
                     let battles = yield battle_model_1.default.find()
                         .limit(Number(limit))
                         .skip(skip)
                         .select("question texte propositions user_id created_at");
-                    return res.status(200).json(battles);
+                    const battlesWithValues = yield Promise.all(battles.map((battle) => __awaiter(this, void 0, void 0, function* () {
+                        return addValueToProposition(battle);
+                    })));
+                    return res.status(200).json(battlesWithValues);
                 }
                 const battles = yield battle_model_1.default.find().select("question texte propositions user_id");
-                res.status(200).json(battles);
+                const battlesWithValues = yield Promise.all(battles.map((battle) => __awaiter(this, void 0, void 0, function* () {
+                    return addValueToProposition(battle);
+                })));
+                res.status(200).json(battlesWithValues);
             }
             catch (error) {
                 res.status(500).json({ message: error });
@@ -92,7 +121,8 @@ class BattleController {
                 if (!battle) {
                     return res.status(404).json({ message: "Battle not found" });
                 }
-                res.status(200).json(battle);
+                const battleWithValues = yield addValueToProposition(battle);
+                res.status(200).json(battleWithValues);
             }
             catch (error) {
                 res.status(500).json({ message: error });
@@ -120,7 +150,7 @@ class BattleController {
                 if (!battle) {
                     return res.status(404).json({ message: "Battle not found" });
                 }
-                battle.save();
+                yield battle.save();
                 res.status(200).json(battle);
             }
             catch (error) {

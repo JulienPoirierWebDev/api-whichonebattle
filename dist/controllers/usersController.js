@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const user_model_1 = __importDefault(require("../models/user.model"));
 const dbErrorHandler_1 = require("../helpers/dbErrorHandler");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 class UserController {
     getAll(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -45,7 +46,10 @@ class UserController {
             try {
                 const user = new user_model_1.default(req.body);
                 yield user.save();
-                res.status(201).json(user);
+                // create a token
+                const jwtSecret = process.env.JWT_SECRET || "default_secret_is_here";
+                const token = jsonwebtoken_1.default.sign({ _id: user._id }, jwtSecret);
+                res.status(201).json({ user, token });
             }
             catch (error) {
                 res.status(500).json((0, dbErrorHandler_1.getErrorMessage)(error));

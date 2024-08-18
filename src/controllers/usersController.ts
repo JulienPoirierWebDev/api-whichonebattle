@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/user.model";
 import { getErrorMessage } from "../helpers/dbErrorHandler";
+import jwt from "jsonwebtoken";
 interface IUsersController {
   getAll(req: Request, res: Response): void;
 }
@@ -31,7 +32,13 @@ class UserController implements IUsersController {
     try {
       const user = new User(req.body);
       await user.save();
-      res.status(201).json(user);
+      // create a token
+
+      const jwtSecret = process.env.JWT_SECRET || "default_secret_is_here";
+
+      const token = jwt.sign({ _id: user._id }, jwtSecret);
+
+      res.status(201).json({ user, token });
     } catch (error) {
       res.status(500).json(getErrorMessage(error));
     }

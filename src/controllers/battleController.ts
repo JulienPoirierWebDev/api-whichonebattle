@@ -2,11 +2,34 @@ import Battle from "../models/battle.model";
 import { Request, Response } from "express";
 import { IRequest } from "./authController";
 import Vote from "../models/vote.model";
-import { log } from "node:console";
 
 interface IBattleController {
   getAll(req: Request, res: Response): void;
 }
+
+const addValueToProposition = async (battle: any) => {
+  // Convertir l'objet Mongoose en objet JavaScript ordinaire
+  const battleObj = battle.toObject();
+
+  const votes = await Vote.find({
+    battle_id: battle._id,
+    name: { $in: battleObj.propositions.map((p: { name: string }) => p.name) },
+  });
+
+  const propositionValues = battleObj.propositions.map(
+    (proposition: { name: string }) => {
+      const value = votes.filter(
+        (vote) => vote.name === proposition.name
+      ).length;
+      return { ...proposition, value };
+    }
+  );
+
+  return {
+    ...battleObj,
+    propositions: propositionValues,
+  };
+};
 
 class BattleController implements IBattleController {
   async getAll(req: IRequest, res: Response) {
@@ -37,7 +60,7 @@ class BattleController implements IBattleController {
 
             const votedBattlesIds = votedBattles.map((vote) => vote.battle_id);
 
-            const battles = await Battle.find({
+            let battles = await Battle.find({
               _id: { $nin: votedBattlesIds },
             })
               .limit(Number(limit))
@@ -45,7 +68,15 @@ class BattleController implements IBattleController {
               .sort({ created_at: date })
               .select("question texte propositions user_id created_at");
 
-            return res.status(200).json(battles);
+            // get value of proposition if any vote
+
+            const battlesWithValues = await Promise.all(
+              battles.map(async (battle) => {
+                return addValueToProposition(battle);
+              })
+            );
+
+            return res.status(200).json(battlesWithValues);
           }
 
           let battles = await Battle.find()
@@ -54,7 +85,12 @@ class BattleController implements IBattleController {
             .sort({ created_at: date })
             .select("question texte propositions user_id created_at");
 
-          return res.status(200).json(battles);
+          const battlesWithValues = await Promise.all(
+            battles.map(async (battle) => {
+              return addValueToProposition(battle);
+            })
+          );
+          return res.status(200).json(battlesWithValues);
         }
 
         if (unvoted) {
@@ -77,7 +113,12 @@ class BattleController implements IBattleController {
             .skip(skip)
             .select("question texte propositions user_id created_at");
 
-          return res.status(200).json(battles);
+          const battlesWithValues = await Promise.all(
+            battles.map(async (battle) => {
+              return addValueToProposition(battle);
+            })
+          );
+          return res.status(200).json(battlesWithValues);
         }
 
         let battles = await Battle.find()
@@ -85,13 +126,24 @@ class BattleController implements IBattleController {
           .skip(skip)
           .select("question texte propositions user_id created_at");
 
-        return res.status(200).json(battles);
+        const battlesWithValues = await Promise.all(
+          battles.map(async (battle) => {
+            return addValueToProposition(battle);
+          })
+        );
+        return res.status(200).json(battlesWithValues);
       }
 
       const battles = await Battle.find().select(
         "question texte propositions user_id"
       );
-      res.status(200).json(battles);
+
+      const battlesWithValues = await Promise.all(
+        battles.map(async (battle) => {
+          return addValueToProposition(battle);
+        })
+      );
+      res.status(200).json(battlesWithValues);
     } catch (error) {
       res.status(500).json({ message: error });
     }
@@ -105,7 +157,8 @@ class BattleController implements IBattleController {
       if (!battle) {
         return res.status(404).json({ message: "Battle not found" });
       }
-      res.status(200).json(battle);
+      const battleWithValues = await addValueToProposition(battle);
+      res.status(200).json(battleWithValues);
     } catch (error) {
       res.status(500).json({ message: error });
     }
@@ -136,7 +189,7 @@ class BattleController implements IBattleController {
         return res.status(404).json({ message: "Battle not found" });
       }
 
-      battle.save();
+      await battle.save();
 
       res.status(200).json(battle);
     } catch (error) {
