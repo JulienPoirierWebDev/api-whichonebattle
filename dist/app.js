@@ -22,7 +22,69 @@ app.use("/api/battles", battle_router_1.default);
 app.use("/api/auth", auth_router_1.default);
 app.use("/api/battles", vote_router_1.default);
 app.get("/", (req, res) => {
-    res.send("Hello world");
+    // describe api routes and how to use them
+    const documentation = {
+        "/api/users": {
+            description: "get all users",
+            methods: {
+                GET: "Get all users",
+                POST: "Create a user",
+            },
+        },
+        "/api/users/:id": {
+            description: "read, update, delete a user",
+            methods: {
+                GET: "Get a user",
+                PUT: "Update a user",
+                DELETE: "Delete a user",
+            },
+        },
+        "/api/battles": {
+            description: "CRUD operations for battles",
+            methods: {
+                GET: "Get all battles",
+                POST: "Create a battle",
+            },
+        },
+        "/api/battles:id": {
+            description: "CRUD operations for a battle",
+            methods: {
+                GET: "Get a battle",
+                PUT: "Update a battle",
+                DELETE: "Delete a battle",
+            },
+        },
+        "/api/battles/:id/vote": {
+            description: "Vote for a battle",
+            methods: {
+                PUT: "Vote for a battle",
+            },
+            body: {
+                name: "Name of the proposition you want to vote for",
+            },
+        },
+        "/api/auth/signin": {
+            description: "Sign in a user",
+            methods: {
+                POST: "Sign in a user",
+            },
+        },
+        "/api/auth/signout": {
+            description: "Sign out a user",
+            methods: {
+                GET: "Sign out a user",
+            },
+        },
+        "/api/battles/:id": {
+            description: "CRUD operations for a battle",
+            methods: {
+                GET: "Get a battle",
+                PUT: "Update a battle",
+                DELETE: "Delete a battle",
+            },
+        },
+    };
+    res.json(documentation);
 });
 /*
 app.get("/api/populate_db", (req, res) => {

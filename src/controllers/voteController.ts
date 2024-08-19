@@ -39,7 +39,11 @@ class VoteController {
     ) {
       return res
         .status(400)
-        .json({ error: "The name you provided is not in the propositions" });
+        .json({
+          error: "The name you provided is not in the propositions",
+          yourName: name,
+          propositions: battle.propositions.map((p) => p.name),
+        });
     }
     // create a new vote
     const newVote = new Vote({
