@@ -76,7 +76,7 @@ class BattleController implements IBattleController {
               })
             );
 
-            return res.status(200).json(battlesWithValues);
+            return res.status(200).json(battlesWithValues.reverse());
           }
 
           let battles = await Battle.find()
@@ -90,7 +90,7 @@ class BattleController implements IBattleController {
               return addValueToProposition(battle);
             })
           );
-          return res.status(200).json(battlesWithValues);
+          return res.status(200).json(battlesWithValues.reverse());
         }
 
         if (unvoted) {
@@ -118,7 +118,7 @@ class BattleController implements IBattleController {
               return addValueToProposition(battle);
             })
           );
-          return res.status(200).json(battlesWithValues);
+          return res.status(200).json(battlesWithValues.reverse());
         }
 
         let battles = await Battle.find()
@@ -131,7 +131,7 @@ class BattleController implements IBattleController {
             return addValueToProposition(battle);
           })
         );
-        return res.status(200).json(battlesWithValues);
+        return res.status(200).json(battlesWithValues.reverse());
       }
 
       const battles = await Battle.find().select(
@@ -143,7 +143,7 @@ class BattleController implements IBattleController {
           return addValueToProposition(battle);
         })
       );
-      res.status(200).json(battlesWithValues);
+      res.status(200).json(battlesWithValues.reverse());
     } catch (error) {
       res.status(500).json({ message: error });
     }
@@ -164,9 +164,10 @@ class BattleController implements IBattleController {
     }
   }
 
-  async create(req: Request, res: Response) {
+  async create(req: IRequest, res: Response) {
     try {
-      const battle = new Battle(req.body);
+      const battleJson = { ...req.body, user_id: req.auth._id };
+      const battle = new Battle(battleJson);
 
       await battle.save();
       res.status(201).json(battle);

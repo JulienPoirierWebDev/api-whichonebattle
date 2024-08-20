@@ -12,7 +12,7 @@ const authController = new authController_1.default();
 router
     .get("/", authController.decode, battleController.getAll)
     .get("/:id", battleController.getOne)
-    .post("/", battleController.create)
-    .put("/:id", battleController.update)
-    .delete("/:id", battleController.delete);
+    .post("/", authController.requireSignin, authController.hasAuthorization, battleController.create)
+    .put("/:id", authController.requireSignin, authController.hasAuthorization, battleController.update)
+    .delete("/:id", authController.requireSignin, authController.hasAuthorization, battleController.delete);
 exports.default = router;

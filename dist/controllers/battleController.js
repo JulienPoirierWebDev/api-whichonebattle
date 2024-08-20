@@ -61,7 +61,7 @@ class BattleController {
                             const battlesWithValues = yield Promise.all(battles.map((battle) => __awaiter(this, void 0, void 0, function* () {
                                 return addValueToProposition(battle);
                             })));
-                            return res.status(200).json(battlesWithValues);
+                            return res.status(200).json(battlesWithValues.reverse());
                         }
                         let battles = yield battle_model_1.default.find()
                             .limit(Number(limit))
@@ -71,7 +71,7 @@ class BattleController {
                         const battlesWithValues = yield Promise.all(battles.map((battle) => __awaiter(this, void 0, void 0, function* () {
                             return addValueToProposition(battle);
                         })));
-                        return res.status(200).json(battlesWithValues);
+                        return res.status(200).json(battlesWithValues.reverse());
                     }
                     if (unvoted) {
                         if (!req.auth) {
@@ -92,7 +92,7 @@ class BattleController {
                         const battlesWithValues = yield Promise.all(battles.map((battle) => __awaiter(this, void 0, void 0, function* () {
                             return addValueToProposition(battle);
                         })));
-                        return res.status(200).json(battlesWithValues);
+                        return res.status(200).json(battlesWithValues.reverse());
                     }
                     let battles = yield battle_model_1.default.find()
                         .limit(Number(limit))
@@ -101,13 +101,13 @@ class BattleController {
                     const battlesWithValues = yield Promise.all(battles.map((battle) => __awaiter(this, void 0, void 0, function* () {
                         return addValueToProposition(battle);
                     })));
-                    return res.status(200).json(battlesWithValues);
+                    return res.status(200).json(battlesWithValues.reverse());
                 }
                 const battles = yield battle_model_1.default.find().select("question texte propositions user_id");
                 const battlesWithValues = yield Promise.all(battles.map((battle) => __awaiter(this, void 0, void 0, function* () {
                     return addValueToProposition(battle);
                 })));
-                res.status(200).json(battlesWithValues);
+                res.status(200).json(battlesWithValues.reverse());
             }
             catch (error) {
                 res.status(500).json({ message: error });
@@ -132,7 +132,8 @@ class BattleController {
     create(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const battle = new battle_model_1.default(req.body);
+                const battleJson = Object.assign(Object.assign({}, req.body), { user_id: req.auth._id });
+                const battle = new battle_model_1.default(battleJson);
                 yield battle.save();
                 res.status(201).json(battle);
             }
