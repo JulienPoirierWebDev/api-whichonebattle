@@ -57,7 +57,7 @@ class AuthController {
   decode = (req: IRequest, res: Response, next: NextFunction) => {
     if (req.headers.authorization) {
       const token = req.headers.authorization.split(" ")[1];
-      const decoded = jwt.verify(token, jwtSecret) as any;
+      const decoded = jwt.verify(token, jwtSecret);
       req.auth = decoded;
     }
     next();
