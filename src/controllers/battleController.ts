@@ -7,7 +7,7 @@ interface IBattleController {
   getAll(req: Request, res: Response): void;
 }
 
-const addValueToProposition = async (battle: any) => {
+const addValueToProposition = async (battle: any, request:IRequest) => {
   // Convertir l'objet Mongoose en objet JavaScript ordinaire
   const battleObj = battle.toObject();
 
@@ -25,6 +25,15 @@ const addValueToProposition = async (battle: any) => {
     }
   );
 
+  
+
+  if(request.auth && request.auth._id) {
+  const userVote = await Vote.findOne({ user_id: request.auth._id, battle_id: battle._id });
+    if (userVote) {
+      battleObj.userVote = userVote;
+    }
+  }
+
   return {
     ...battleObj,
     propositions: propositionValues,
@@ -34,6 +43,7 @@ const addValueToProposition = async (battle: any) => {
 class BattleController implements IBattleController {
   async getAll(req: IRequest, res: Response) {
     try {
+  
       // get query parameters
       const { limit, page, order, unvoted } = req.query;
 
@@ -72,7 +82,7 @@ class BattleController implements IBattleController {
 
             const battlesWithValues = await Promise.all(
               battles.map(async (battle) => {
-                return addValueToProposition(battle);
+                return addValueToProposition(battle, req);
               })
             );
 
@@ -87,7 +97,7 @@ class BattleController implements IBattleController {
 
           const battlesWithValues = await Promise.all(
             battles.map(async (battle) => {
-              return addValueToProposition(battle);
+              return addValueToProposition(battle, req);
             })
           );
           return res.status(200).json(battlesWithValues.reverse());
@@ -115,7 +125,7 @@ class BattleController implements IBattleController {
 
           const battlesWithValues = await Promise.all(
             battles.map(async (battle) => {
-              return addValueToProposition(battle);
+              return addValueToProposition(battle,req);
             })
           );
           return res.status(200).json(battlesWithValues.reverse());
@@ -128,7 +138,7 @@ class BattleController implements IBattleController {
 
         const battlesWithValues = await Promise.all(
           battles.map(async (battle) => {
-            return addValueToProposition(battle);
+            return addValueToProposition(battle,req);
           })
         );
         return res.status(200).json(battlesWithValues.reverse());
@@ -140,7 +150,7 @@ class BattleController implements IBattleController {
 
       const battlesWithValues = await Promise.all(
         battles.map(async (battle) => {
-          return addValueToProposition(battle);
+          return addValueToProposition(battle, req);
         })
       );
       res.status(200).json(battlesWithValues.reverse());
@@ -157,7 +167,7 @@ class BattleController implements IBattleController {
       if (!battle) {
         return res.status(404).json({ message: "Battle not found" });
       }
-      const battleWithValues = await addValueToProposition(battle);
+      const battleWithValues = await addValueToProposition(battle, req);
       res.status(200).json(battleWithValues);
     } catch (error) {
       res.status(500).json({ message: error });
